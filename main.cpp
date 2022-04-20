@@ -49,7 +49,6 @@ struct vertex
   int numEdge;  // how many edges separate the vertex from the starting vertex?
   int distance; // how far is the vertex from the starting vertex?
   /*****************************************************************************************************************************************/
-  string path[100];        // what is the path between the vertex and the starting vertex?
   string name;             // what is the name of the vertex?
   vector<adjVertex> adj;   // what are the adjacent vertices to the vertex?
   vector<queueVertex> que; // what are the edges, distance, and path to start vertex?
@@ -81,6 +80,7 @@ public:
 
 protected:
 private:
+  vector<string> tempPath;
   vector<vertex> vertices;
 
   void addVertex(string city);                                        // adds vertexes of city graph
@@ -97,6 +97,7 @@ Project::Project()
   PatientList.clear();
   DonorList.clear();
   history.clear();
+  tempPath.clear();
 }
 
 // The addVertex function is used in the creation of our city graph.
@@ -248,6 +249,12 @@ int Project::Dijkstra(string starting, string destination)
     path.push_back(temp->name);
     temp = temp->previous;
   }
+  // for (auto x : path)
+  // {
+  //   cout << x << "->";
+  // }
+  // cout << endl;
+  tempPath = path;
   return dest->distance;
 }
 
@@ -381,13 +388,15 @@ Patient *Project::findPatientMatch(Donor *d)
 
   int best_score = INT_MIN;
   Patient *best = NULL;
-  int minT = INT_MAX;
+  Patient *secondBest = NULL;
+  int minT = INT_MAX, minT2 = INT_MAX;
   Patient *p = NULL;
   int count = 0;
   int score;
   int time_taken;
-
+  vector<string> finalPath;
   int m = 0;
+
   while (js[m] != "")
   {
     count = 0;
@@ -396,10 +405,16 @@ Patient *Project::findPatientMatch(Donor *d)
     {
       // count++; // relative time on waiting list
       time_taken = findShortestDistance(p->location, d->location);
+      if (time_taken <= minT2)
+      {
+        secondBest = p;
+        minT2 = time_taken;
+      }
       if (p->time_left >= time_taken && p->time_left <= minT)
       {
         best = p;
         minT = p->time_left;
+        finalPath = tempPath;
       }
       p = p->next;
     }
@@ -407,11 +422,19 @@ Patient *Project::findPatientMatch(Donor *d)
   }
   if (best == NULL)
   {
-    cout << "No suitable patient was found" << endl;
+    cout << "\nNo Patient which can be reached on time..\n";
+    cout << "The nearest Patient " << secondBest->name << " was found " << minT2 << " hours far in " << secondBest->location << endl;
   }
   else
   {
-    cout << "Match found with " << best->name << " at " << best->location << endl;
+    cout << "\nMatch found with " << best->name << " at " << best->location << endl;
+
+    cout << "The route is: ";
+    for (int i = 0; i < finalPath.size() - 1; i++)
+    {
+      cout << finalPath[i] << "->";
+    }
+    cout << finalPath[finalPath.size() - 1] << endl;
   }
   return best;
 }
@@ -450,10 +473,12 @@ Donor *Project::findDonorMatch(Patient *p)
 
   int best_score = INT_MIN;
   Donor *best = NULL;
+  Donor *secondBest = NULL;
   int score;
   int time_taken;
   int count;
-  int minT = INT_MAX;
+  int minT = INT_MAX, minT2 = INT_MAX;
+  vector<string> finalPath;
   int m = 0;
 
   while (js[m] != "")
@@ -464,10 +489,16 @@ Donor *Project::findDonorMatch(Patient *p)
     while (d != NULL)
     {
       time_taken = findShortestDistance(p->location, d->location);
+      if (time_taken <= minT2)
+      {
+        secondBest = d;
+        minT2 = time_taken;
+      }
       if (p->time_left >= time_taken && p->time_left <= minT)
       {
         best = d;
         minT = p->time_left;
+        finalPath = tempPath;
       }
       d = d->next;
     }
@@ -475,11 +506,19 @@ Donor *Project::findDonorMatch(Patient *p)
   }
   if (best != NULL)
   {
-    cout << "Match found with " << best->name << " at " << best->location << endl;
+    cout << "\nMatch found with " << best->name << " at " << best->location << endl;
+
+    cout << "The route is: ";
+    for (int i = 0; i < finalPath.size() - 1; i++)
+    {
+      cout << finalPath[i] << "->";
+    }
+    cout << finalPath[finalPath.size() - 1] << endl;
   }
   else
   {
-    cout << "No suitable donor was found." << endl;
+    cout << "\nNo Donor which can be reached on time..\n";
+    cout << "The nearest Donor " << secondBest->name << " was found " << minT2 << " hours far in " << secondBest->location << endl;
   }
   return NULL;
 }
@@ -499,6 +538,12 @@ Patient *Project::addPatient(string name, string organ, string blood_type, strin
     {
       cityfound = true;
     }
+  }
+
+  if (blood_type != "A" && blood_type != "B" && blood_type != "AB" && blood_type != "O")
+  {
+    cout << "Invalid Blood Group!!" << endl;
+    return NULL;
   }
 
   if (cityfound == false)
@@ -548,6 +593,12 @@ Donor *Project::addDonor(string name, string organ, string blood_type, string ci
     }
   }
 
+  if (blood_type != "A" && blood_type != "B" && blood_type != "AB" && blood_type != "O")
+  {
+    cout << "Invalid Blood Group!!" << endl;
+    return NULL;
+  }
+
   if (cityfound == false)
   {
     cout << "City not Found!!" << endl;
@@ -565,7 +616,7 @@ Donor *Project::addDonor(string name, string organ, string blood_type, string ci
   if (x == NULL)
   {
     DonorList[{organ, blood_type}] = n;
-    cout << "Donor " << n->name << " Added " << n->organ << " " << n->blood_type << " " << n->location << endl;
+    cout << "Donor " << n->name << " Added " << endl;
     return n;
   }
   while (x->next != NULL)
@@ -575,7 +626,7 @@ Donor *Project::addDonor(string name, string organ, string blood_type, string ci
   n->prev = x;
   x->next = n;
 
-  cout << "Donor " << n->name << " Added" << n->organ << " " << n->blood_type << "" << n->location << endl;
+  cout << "Donor " << n->name << " Added" << endl;
   return n;
 }
 
@@ -698,17 +749,18 @@ int main()
   // The following block of code reads in the patient list (.txt file) and adds them all to the patient table
   ifstream textFile;
   textFile.open("patientList.txt");
+  ifstream textFile2;
+  textFile2.open("donorList.txt");
+  ofstream PatientFile("patientList.txt", ios::out | ios::app);
+  ofstream DonorFile("donorList.txt", ios::out | ios::app);
   string line;
-  string tempLine;
   string name;
   string organ;
   string blood_type;
   string city;
-  int successRate;
   int time;
   while (!textFile.eof())
   {
-
     getline(textFile, line, ',');
     name = line;
 
@@ -729,10 +781,34 @@ int main()
       myTree.addPatient(name, organ, blood_type, city, time); // adds each patient from the txt file to the patient table, replacing the placeholders
     }
   }
+  string line2;
+  string name2;
+  string organ2;
+  string blood_type2;
+  string city2;
+  while (!textFile2.eof())
+  {
+    getline(textFile2, line2, ',');
+    name2 = line2;
+
+    getline(textFile2, line2, ',');
+    organ2 = line2;
+
+    getline(textFile2, line2, ',');
+    blood_type2 = line2;
+
+    getline(textFile2, line2);
+    city2 = line2;
+
+    if (!textFile2.eof())
+    {
+      myTree.addDonor(name2, organ2, blood_type2, city2); // adds each patient from the txt file to the patient table, replacing the placeholders
+    }
+  }
   while (running == true)
   {
     // build main menu
-    cout << "\n\n======Main Menu=====" << endl;
+    cout << "======Main Menu=====" << endl;
     cout << "1. Add a patient" << endl;
     cout << "2. Add a donor" << endl;
     cout << "3. Delete a patient" << endl;
@@ -742,15 +818,15 @@ int main()
     cout << "7. Print patients" << endl;
     cout << "8. Print donors" << endl;
     cout << "9. Operate History" << endl;
-    cout << "10. Quit" << endl;
+    cout << "10. Quit\n"
+         << endl;
 
     // takes user input
-    int answer;
-    cin >> answer;
-	system("clear");
-    cin.ignore();
+    string answer;
+    getline(cin, answer);
 
-    if (answer == 1)
+    cout << endl;
+    if (answer == "1")
     {
       cout << "Enter patient name:" << endl; // ex: Johnson (We entered last names, but any name can identify a patient)
       string name;
@@ -773,7 +849,7 @@ int main()
       cout << "Enter location:" << endl; // ex: Bangalore
       string location;
       getline(cin, location);
-
+      cout << endl;
       // here we add the input information into the patient table, and then check if there is a donor
       // already available to be matched with the patient. If there is, a Pair is created and the patient
       // is removed from the table.
@@ -790,9 +866,20 @@ int main()
         myTree.deleteDonor(donorMatch->name);                                    // deletes donor from table because the organ has been allocated
         myTree.deletePatient(newPatient->name);                                  // deletes patient from table because they no longer need an organ
       }
+      else if (newPatient != NULL)
+      {
+        if (PatientFile.is_open())
+        {
+          cout << "Patient Added to List" << endl;
+          PatientFile << name << "," << organ << "," << blood_type << "," << location << "," << time_left << endl;
+        }
+        else
+        {
+          cout << "Unable to open file." << endl;
+        }
+      }
     }
-
-    if (answer == 2)
+    else if (answer == "2")
     {
       cout << "Enter donor name:" << endl; // ex: Smith
       string name;
@@ -809,7 +896,7 @@ int main()
       cout << "Enter location:" << endl; // ex: Ranchi
       string location;
       getline(cin, location);
-
+      cout << endl;
       // here we add the input information into the donor table and check for a suitable match in the patient table.
       // If a candidate is found, a Pair is made and the donor is removed from the table.
       Donor *newDonor = myTree.addDonor(name, organ, blood_type, location); // Adds the donor to the donor table
@@ -818,62 +905,101 @@ int main()
       {
         patientMatch = myTree.findPatientMatch(newDonor); // searches patient tree for a match to the donor, assigns it to patientMatch if found
       }
+
       if (patientMatch != NULL)
       {
         myTree.history.push_back({{patientMatch->name, newDonor->name}, organ}); // places the donor-patient pair into a waiting list for surgery
         myTree.deletePatient(patientMatch->name);                                // removes the patient from the patient table (since they no longer need a donor)
         myTree.deleteDonor(newDonor->name);                                      // removes the donor from the donor table (since the organ has been allocated)
       }
+      else if (newDonor != NULL)
+      {
+        if (DonorFile.is_open())
+        {
+          cout << "Donor Added to List" << endl;
+          DonorFile << name << "," << organ << "," << blood_type << "," << location << endl;
+        }
+        else
+        {
+          cout << "Unable to open file." << endl;
+        }
+      }
     }
-
-    if (answer == 3)
+    else if (answer == "3")
     {
       cout << "Enter patient name:" << endl; // ex: Jamison
       string name;
       getline(cin, name);
       myTree.deletePatient(name); // deletes patient from patient table
     }
-
-    if (answer == 4)
+    else if (answer == "4")
     {
       cout << "Enter donor name:" << endl; // ex: Chen
       string name;
       getline(cin, name);
       myTree.deleteDonor(name); // deletes donor from donor table
     }
-
-    if (answer == 5)
+    else if (answer == "5")
     {
       int count = myTree.countPatients();                            // counts the number of patients in the table and assigns it to a variable
       cout << "There are " << count << " patients waiting." << endl; // outputs the number of patients in the patient table
     }
-
-    if (answer == 6)
+    else if (answer == "6")
     {
       int count = myTree.countDonors();                              // counts the number of donors in the table and assigns it to a variable
       cout << "There are " << count << " donors availible." << endl; // outputs the number of donors in the donor table
     }
-
-    if (answer == 7)
+    else if (answer == "7")
     {
       myTree.printPatients(); // prints the list of patients and all their attributes
     }
-
-    if (answer == 8)
+    else if (answer == "8")
     {
       myTree.printDonors(); // prints the list of donors and all their attributes
     }
-
-    if (answer == 9)
+    else if (answer == "9")
     {
       myTree.OperateHistory(); // Performs a surgery on the first Pair in the queue
     }
-
-    if (answer == 10)
+    else if (answer == "10")
     {
+      ofstream PatientFileClose("patientList.txt", ios::out | ios::trunc);
+      Patient *Ptemp = NULL;
+      for (auto x : myTree.PatientList)
+      {
+        Ptemp = x.second;
+        while (Ptemp != NULL)
+        {
+          PatientFileClose << Ptemp->name << "," << Ptemp->organ << "," << Ptemp->blood_type << "," << Ptemp->location << "," << Ptemp->time_left << endl;
+          Ptemp = Ptemp->next;
+        }
+      }
+      PatientFileClose.close();
+      ofstream DonorFileClose("donorList.txt", ios::out | ios::trunc);
+      Donor *Dtemp = NULL;
+      for (auto x : myTree.DonorList)
+      {
+        Dtemp = x.second;
+        while (Dtemp != NULL)
+        {
+          DonorFileClose << Dtemp->name << "," << Dtemp->organ << "," << Dtemp->blood_type << "," << Dtemp->location << endl;
+          Dtemp = Dtemp->next;
+        }
+      }
+      DonorFileClose.close();
       running = false; // ends while loop, thus ending program
+
       cout << "Goodbye!" << endl;
       return 0;
     }
+    else
+    {
+      cout << "Invalid Input.. Please enter correct Input.." << endl;
+    }
+
+    cout << "\n\nEnter any key to continue ..." << endl;
+    string wait;
+    getline(cin, name);
+    system("CLS");
   }
 }
