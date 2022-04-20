@@ -732,7 +732,7 @@ int main()
   while (running == true)
   {
     // build main menu
-    cout << "======Main Menu=====" << endl;
+    cout << "\n\n======Main Menu=====" << endl;
     cout << "1. Add a patient" << endl;
     cout << "2. Add a donor" << endl;
     cout << "3. Delete a patient" << endl;
@@ -747,6 +747,7 @@ int main()
     // takes user input
     int answer;
     cin >> answer;
+	system("clear");
     cin.ignore();
 
     if (answer == 1)
