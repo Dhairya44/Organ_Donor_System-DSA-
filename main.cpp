@@ -422,14 +422,21 @@ Patient *Project::findPatientMatch(Donor *d)
   }
   if (best == NULL)
   {
-    cout << "\nNo Patient which can be reached on time..\n";
-    cout << "The nearest Patient " << secondBest->name << " was found " << minT2 << " hours far in " << secondBest->location << endl;
+    if (secondBest == NULL)
+    {
+      cout << "\nNo compatible Patient Found!!" << endl;
+    }
+    else
+    {
+      cout << "\nNo Patient which can be reached on time..\n";
+      cout << "\nThe nearest Patient " << secondBest->name << " was found " << minT2 << " hours far in " << secondBest->location << endl;
+    }
   }
   else
   {
     cout << "\nMatch found with " << best->name << " at " << best->location << endl;
 
-    cout << "The route is: ";
+    cout << "\nThe route is: ";
     for (int i = 0; i < finalPath.size() - 1; i++)
     {
       cout << finalPath[i] << "->";
@@ -508,7 +515,7 @@ Donor *Project::findDonorMatch(Patient *p)
   {
     cout << "\nMatch found with " << best->name << " at " << best->location << endl;
 
-    cout << "The route is: ";
+    cout << "\nThe route is: ";
     for (int i = 0; i < finalPath.size() - 1; i++)
     {
       cout << finalPath[i] << "->";
@@ -517,8 +524,15 @@ Donor *Project::findDonorMatch(Patient *p)
   }
   else
   {
-    cout << "\nNo Donor which can be reached on time..\n";
-    cout << "The nearest Donor " << secondBest->name << " was found " << minT2 << " hours far in " << secondBest->location << endl;
+    if (secondBest == NULL)
+    {
+      cout << "\nNo compatible Donor Found!!" << endl;
+    }
+    else
+    {
+      cout << "\nNo Donor which can be reached on time..\n";
+      cout << "The nearest Donor " << secondBest->name << " was found " << minT2 << " hours far in " << secondBest->location << endl;
+    }
   }
   return NULL;
 }
@@ -828,6 +842,7 @@ int main()
     cout << endl;
     if (answer == "1")
     {
+      bool flag = 0;
       cout << "Enter patient name:" << endl; // ex: Johnson (We entered last names, but any name can identify a patient)
       string name;
       getline(cin, name);
@@ -840,11 +855,24 @@ int main()
       string blood_type;
       getline(cin, blood_type);
 
-      cout << "Enter time left:" << endl; // ex: 3 (this is measured in hours)
-      int time_left;
-      string str_time_left;
-      getline(cin, str_time_left);
-      time_left = atoi(str_time_left.c_str());
+      int time_left = 0;
+      while (flag == 0)
+      {
+        cout << "Enter time left:" << endl; // ex: 3 (this is measured in hours)
+        string str_time_left;
+        getline(cin, str_time_left);
+        int i = 0;
+        for (i = 0; i < str_time_left.size(); i++)
+        {
+          if (str_time_left[i] < 49 || str_time_left[i] > 57)
+            break;
+        }
+        if (i == str_time_left.size())
+        {
+          time_left = atoi(str_time_left.c_str());
+          flag = 1;
+        }
+      }
 
       cout << "Enter location:" << endl; // ex: Bangalore
       string location;
@@ -859,6 +887,10 @@ int main()
       {
         Donor *donorMatch = myTree.findDonorMatch(newPatient); // searches donor table for a match for the patient, assigns it to donorMatch if found
       }
+      else
+      {
+        cout << "\nInvalid Patient enter again" << endl;
+      }
 
       if (donorMatch != NULL)
       {
@@ -870,7 +902,7 @@ int main()
       {
         if (PatientFile.is_open())
         {
-          cout << "Patient Added to List" << endl;
+          cout << "\nPatient Added to List" << endl;
           PatientFile << name << "," << organ << "," << blood_type << "," << location << "," << time_left << endl;
         }
         else
@@ -905,6 +937,10 @@ int main()
       {
         patientMatch = myTree.findPatientMatch(newDonor); // searches patient tree for a match to the donor, assigns it to patientMatch if found
       }
+      else
+      {
+        cout << "\nInvalid Donor enter again" << endl;
+      }
 
       if (patientMatch != NULL)
       {
@@ -916,7 +952,7 @@ int main()
       {
         if (DonorFile.is_open())
         {
-          cout << "Donor Added to List" << endl;
+          cout << "\nDonor Added to List" << endl;
           DonorFile << name << "," << organ << "," << blood_type << "," << location << endl;
         }
         else
