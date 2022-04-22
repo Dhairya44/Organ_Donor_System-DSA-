@@ -910,6 +910,18 @@ int main()
       string name;
       getline(cin, name);
       myTree.deletePatient(name);
+      ofstream PatientFileClose("patientList.txt", ios::out | ios::trunc);
+      Patient *Ptemp = NULL;
+      for (auto x : myTree.PatientList)
+      {
+        Ptemp = x.second;
+        while (Ptemp != NULL)
+        {
+          PatientFileClose << Ptemp->name << "," << Ptemp->organ << "," << Ptemp->blood_type << "," << Ptemp->location << "," << Ptemp->time_left << endl;
+          Ptemp = Ptemp->next;
+        }
+      }
+      PatientFileClose.close();
     }
     else if (answer == "4")
     {
@@ -917,6 +929,18 @@ int main()
       string name;
       getline(cin, name);
       myTree.deleteDonor(name);
+      ofstream DonorFileClose("donorList.txt", ios::out | ios::trunc);
+      Donor *Dtemp = NULL;
+      for (auto x : myTree.DonorList)
+      {
+        Dtemp = x.second;
+        while (Dtemp != NULL)
+        {
+          DonorFileClose << Dtemp->name << "," << Dtemp->organ << "," << Dtemp->blood_type << "," << Dtemp->location << endl;
+          Dtemp = Dtemp->next;
+        }
+      }
+      DonorFileClose.close();
     }
     else if (answer == "5")
     {
@@ -942,33 +966,9 @@ int main()
     }
     else if (answer == "10")
     {
-      ofstream PatientFileClose("patientList.txt", ios::out | ios::trunc);
-      Patient *Ptemp = NULL;
-      for (auto x : myTree.PatientList)
-      {
-        Ptemp = x.second;
-        while (Ptemp != NULL)
-        {
-          PatientFileClose << Ptemp->name << "," << Ptemp->organ << "," << Ptemp->blood_type << "," << Ptemp->location << "," << Ptemp->time_left << endl;
-          Ptemp = Ptemp->next;
-        }
-      }
-      PatientFileClose.close();
-      ofstream DonorFileClose("donorList.txt", ios::out | ios::trunc);
-      Donor *Dtemp = NULL;
-      for (auto x : myTree.DonorList)
-      {
-        Dtemp = x.second;
-        while (Dtemp != NULL)
-        {
-          DonorFileClose << Dtemp->name << "," << Dtemp->organ << "," << Dtemp->blood_type << "," << Dtemp->location << endl;
-          Dtemp = Dtemp->next;
-        }
-      }
-      DonorFileClose.close();
       running = false;
-
-      cout << "Goodbye!" << endl;
+      cout << "Adios!!\n"
+           << endl;
       return 0;
     }
     else
