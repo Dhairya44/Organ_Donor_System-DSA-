@@ -6,7 +6,7 @@ using namespace std;
 struct Donor
 {
   string name;
-  string organ; // see key above for number meanings
+  string organ; 
   string blood_type;
   string location;
   Donor *next;
@@ -20,12 +20,11 @@ struct Patient
   string organ;
   string blood_type;
   string location;
-  int time_left; // priority
+  int time_left; // Constraint
   Patient *next;
   Patient *prev;
 };
 
-//--------------------start of traditional graph-building variables--------------------
 struct vertex;
 
 struct adjVertex
@@ -44,17 +43,15 @@ struct queueVertex
 struct vertex
 {
   vertex *previous;
-  bool visited; // has the vertex been visited?
+  bool visited; 
   int ID;       // what district does the vertex belong to?
   int numEdge;  // how many edges separate the vertex from the starting vertex?
   int distance; // how far is the vertex from the starting vertex?
-  /*****************************************************************************************************************************************/
   string name;             // what is the name of the vertex?
   vector<adjVertex> adj;   // what are the adjacent vertices to the vertex?
   vector<queueVertex> que; // what are the edges, distance, and path to start vertex?
 };
 
-//-------------------------end of traditional graph variables--------------------------
 
 class Project
 {
@@ -74,11 +71,10 @@ public:
   void OperateHistory();                                                                         // operates and outputs results
   void buildGraph();                                                                             // builds graph with cities
 
-  vector<pair<pair<string, string>, string>> history;
+  vector<pair<pair<string, string>, string>> history; // patient, donor , organ
   Patient *findPatientMatch(Donor *); // searches the patient table to find the best match for a new donor
   Donor *findDonorMatch(Patient *);   // searches the donor table to find the first match for a new patient
 
-protected:
 private:
   vector<string> tempPath;
   vector<vertex> vertices;
@@ -249,11 +245,6 @@ int Project::Dijkstra(string starting, string destination)
     path.push_back(temp->name);
     temp = temp->previous;
   }
-  // for (auto x : path)
-  // {
-  //   cout << x << "->";
-  // }
-  // cout << endl;
   tempPath = path;
   return dest->distance;
 }
@@ -275,7 +266,6 @@ int Project::findShortestDistance(string city1, string city2)
 // This function traverses the table of patients and returns an overall count
 int Project::countPatients()
 {
-  // organs: heart, kidney, liver, lungs, pancreas, intestines, head
   // blood tyes: O, A, B, AB
   int count = 0;
   // iterate through organs
@@ -289,14 +279,13 @@ int Project::countPatients()
       temp = temp->next;
     }
   }
+  delete temp;
   return count;
 }
 
 // This function does the same thing as countPatients, but with the donor table
 int Project::countDonors()
 {
-  // organs: heart, kidney, liver, lungs, pancreas, intestines, head
-  // blood tyes: O, A, B, AB
   int count = 0;
   Donor *temp = NULL;
   // iterate through organs
@@ -309,16 +298,13 @@ int Project::countDonors()
       temp = temp->next;
     }
   }
-
+  delete temp;
   return count;
 }
 
 // This function traverses the patient table and prints the data entered for every patient.
-// For ease of use, we are storing the data such as "organ needed" and blood-type as integers,
-// so here we have to include 'if' statements in order to give outputs that are meaningful to the user.
 void Project::printPatients()
 {
-  // organs: heart, kidney, liver, lungs, pancreas, intestines, head
   // blood tyes: O, A, B, AB
   Patient *temp = NULL;
 
@@ -332,12 +318,12 @@ void Project::printPatients()
       temp = temp->next;
     }
   }
+  delete temp;
 }
 
 // This function does the same thing as printPatients, but for the donor table.
 void Project::printDonors()
 {
-  // organs: heart, kidney, liver, lungs, pancreas, intestines, head
   // blood tyes: O, A, B, AB
   Donor *temp;
 
@@ -351,6 +337,7 @@ void Project::printDonors()
       temp = temp->next;
     }
   }
+  delete temp;
 }
 
 // findPatientMatch is a function we use to search through the patient table and see if there are any
@@ -386,24 +373,19 @@ Patient *Project::findPatientMatch(Donor *d)
     js[3] = "O";
   }
 
-  int best_score = INT_MIN;
   Patient *best = NULL;
   Patient *secondBest = NULL;
+  vector<string> finalPath;
   int minT = INT_MAX, minT2 = INT_MAX;
   Patient *p = NULL;
-  int count = 0;
-  int score;
   int time_taken;
-  vector<string> finalPath;
   int m = 0;
 
   while (js[m] != "")
   {
-    count = 0;
     p = PatientList[{d->organ, js[m]}];
     while (p != NULL)
     {
-      // count++; // relative time on waiting list
       time_taken = findShortestDistance(p->location, d->location);
       if (time_taken <= minT2)
       {
@@ -464,7 +446,7 @@ Donor *Project::findDonorMatch(Patient *p)
   if (p->blood_type == "B")
   {
     js[0] = "B";
-    js[1] = "AB";
+    js[1] = "O";
   }
   if (p->blood_type == "AB")
   {
@@ -478,10 +460,8 @@ Donor *Project::findDonorMatch(Patient *p)
     js[0] = "O";
   }
 
-  int best_score = INT_MIN;
   Donor *best = NULL;
   Donor *secondBest = NULL;
-  int score;
   int time_taken;
   int count;
   int minT = INT_MAX, minT2 = INT_MAX;
@@ -574,13 +554,13 @@ Patient *Project::addPatient(string name, string organ, string blood_type, strin
   n->location = city;
   n->next = NULL;
   n->prev = NULL;
-  Patient *x = PatientList[{organ, blood_type}];
-  if (x == NULL)
+  if (PatientList.find({organ, blood_type}) == PatientList.end()) 
   {
     PatientList[{organ, blood_type}] = n;
     cout << "Patient " << n->name << " Added" << endl;
     return n;
   }
+  Patient * x = PatientList[{organ, blood_type}];
   while (x->next != NULL)
   {
     x = x->next;
@@ -626,13 +606,13 @@ Donor *Project::addDonor(string name, string organ, string blood_type, string ci
   n->location = city;
   n->next = NULL;
   n->prev = NULL;
-  Donor *x = DonorList[{organ, blood_type}];
-  if (x == NULL)
+  if (DonorList.find({organ, blood_type}) == DonorList.end())
   {
     DonorList[{organ, blood_type}] = n;
     cout << "Donor " << n->name << " Added " << endl;
     return n;
   }
+  Donor *x = DonorList[{organ, blood_type}];
   while (x->next != NULL)
   {
     x = x->next;
@@ -872,6 +852,9 @@ int main()
           time_left = atoi(str_time_left.c_str());
           flag = 1;
         }
+		else{
+			cout<<"Please enter Time in integer "<<endl;
+		}
       }
 
       cout << "Enter location:" << endl; // ex: Bangalore

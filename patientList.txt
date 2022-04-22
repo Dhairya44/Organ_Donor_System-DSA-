@@ -1,10 +1,13 @@
 Pulkit Agrawal,brain,AB,Jaipur,3
+Samandeep Singh,eyes,A,Bangalore,5
 Vedant Mathur,eyes,B,Mumbai,8
 Harshit Verma,hand,AB,Jalandhar,1
 Khushil Kataria,head,B,Bangalore,5
 Divyan Goyal,heart,B,Surat,4
+Anurag,heart,O,Bangalore,4
 Kamal Agarwal,kidney,A,Chennai,3
 Mohit Aggarwal,leg,O,Delhi,5
 Dhairya Agrawal,liver,B,Baroda,7
 Rahil Sanghavi,lungs,A,Kolkata,6
-Samandeep Singh,eyes,A,Bangalore,5
+k,toes,B,Mumbai,3
+kdjf,Fingers,A,Delhi,8
