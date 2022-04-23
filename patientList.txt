@@ -1,7 +1,4 @@
-Pulkit,brain,AB,Jaipur,3
 Samandeep,eyes,A,Bangalore,5
-Harshit,hand,AB,Jalandhar,1
-Khushil,head,B,Bangalore,5
-Divyan,heart,B,Surat,4
-Kamal,kidney,A,Chennai,3
-Dhairya,liver,B,Baroda,7
+Harsh,hand,A,Jalandhar,1
+akdjf,heart,B,Surat,4
+djkf,heart,B,Surat,4
