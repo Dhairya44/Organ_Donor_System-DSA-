@@ -835,7 +835,7 @@ int main()
       {
         cout << "Enter blood type:" << endl;
         getline(cin, blood_type);
-        transform(blood_type.begin(), blood_type.end(), blood_type.begin(), ::tolower);
+        transform(blood_type.begin(), blood_type.end(), blood_type.begin(), ::toupper);
         if (blood_type == "A" || blood_type == "B" || blood_type == "AB" || blood_type == "O")
         {
           flag = 1;
